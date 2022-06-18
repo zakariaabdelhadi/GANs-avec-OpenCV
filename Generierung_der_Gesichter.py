@@ -28,54 +28,83 @@ import matplotlib.pyplot as plt
  #from colab import locale
 # drive.mount('/content/drive')
 
-
+import detect_gender as dg
 
 #--------------- code korregiert von Tom ----------------------------------------
 import cv2
-# import os
-# import sys
-# from os import listdir
-# from os.path import isfile, join
-# import time
-# import cv2
-# import numpy
-#
-# # CODE TO MAKE THE CROPPING
-# p = 10
-# mypath = 'C:\\Users\\ZAKARIA\\Desktop\\New folder\\CFD Version 3.0\\Images\\Versuch'
-# onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-# images = numpy.empty(len(onlyfiles), dtype=object)
-#
-# outputpath = os.path.join(mypath, 'output_images')
-# if not os.path.exists(outputpath):
-#         os.makedirs(outputpath)
-#
-# face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-# eyes_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
-# for n in range(0, len(onlyfiles)):
-#         images[n] = cv2.imread(join(mypath, onlyfiles[n]))
-#         faces_detected = face_cascade.detectMultiScale(images[n], scaleFactor=1.1, minNeighbors=5)
-#         (x, y, w, h) = faces_detected[0]
-#         # cv2.rectangle(images[n], (x, y), (x + w, y + h), (0, 255, 0), 1)
-#         face = images[n][y:y + h, x:x + w]
-#         #cv2.resize(face, (300, 300), interpolation=cv2.INTER_LINEAR)
-#         scale_percent = 25  # percent of original size
-#
-#         dim = (300, 300)
-#         # resize image
-#         face = cv2.resize(face, dim, interpolation=cv2.INTER_AREA)
-#
-#         cv2.imshow('Face', face)
-#         cv2.waitKey()
-#
-#        # image = cv2.imread("image.png")
-#         cv2.imwrite(outputpath + "/Bilder_bearbeitet_" + str(n) + ".png", face)
+import os
+import sys
+from os import listdir
+from os.path import isfile, join
+import time
+import cv2
+import numpy
+
+# CODE TO MAKE THE CROPPING
+p = 10
+mypath = 'C:\\Users\\ZAKARIA\\Desktop\\New folder\\CFD Version 3.0\\Images\\tiri'
+onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+images = numpy.empty(len(onlyfiles), dtype=object)
+
+outputpath = os.path.join(mypath, 'cropped_resized_images')
+outputpath2 = os.path.join(mypath, 'ohne_fehlerhafte_detection')
+
+if not os.path.exists(outputpath):
+        os.makedirs(outputpath)
+
+if not os.path.exists(outputpath2):
+        os.makedirs(outputpath2)
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+eyes_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+for n in range(0, len(onlyfiles)):
+        images[n] = cv2.imread(join(mypath, onlyfiles[n]))
+        # hier entdecken wir Gesichter im Bild und schneiden wir sie aus (uns ist egal was das Bild nebenbei enthält )
+        faces_detected = face_cascade.detectMultiScale(images[n], scaleFactor=1.1, minNeighbors=5)
+        (x, y, w, h) = faces_detected[0]
+        # cv2.rectangle(images[n], (x, y), (x + w, y + h), (0, 255, 0), 1)
+        # hier schneiden wir das Gesicht genau aus
+        face = images[n][y:y + h, x:x + w]
+
+        dim = (300, 300)
+        # resize image . hier verarbeiten wir die Größe der Bilder
+        face = cv2.resize(face, dim, interpolation=cv2.INTER_AREA)
+        # cv2.resize(face, dim, interpolation=cv2.INTER_LINEAR) # alternativ
+        face = face[50:265, 50:250] # hart cropping
+        face = cv2.resize(face, dim, interpolation=cv2.INTER_AREA)
+
+        #hier anwenden wir den Filter "median Filter", um Noise im Bild zu entfernen
+        face_median = cv2.medianBlur(src=face, ksize=5)     # Median filter "blur"
+        # hier machen wir alle Bilder im Gray scale d.h. ohne Farben außer mischung scala von Schwarz und weiß
+        face_gray = cv2.cvtColor(face_median, cv2.COLOR_BGR2GRAY) # machen alle Bilder schwarz & Weiß
+
+        #cv2.imshow('Face', face)
+        #cv2.waitKey()
+
+       # image = cv2.imread("image.png")
+        cv2.imwrite(outputpath + "/Bild_bearbeitet_" + str(n) + ".png", face_gray)
+        # in der Variable "accept" findet man 1 oder 100
+        # 1: das Bild enthält kein Gesicht
+        # 100: das Bild hat wirklich ein Gesicht entdeckt
+        accept=dg.predict_gender(outputpath + "/Bild_bearbeitet_" + str(n) + ".png")
+        print("der Wert von accept ist: "+str(accept))
+
+        # wir speichern nur Bilder, die wirklich Gesichter beinhalten
+        if (accept==100):
+                print('Gesicht erfolgreich entdeckt')
+                cv2.imwrite(outputpath2 + "/Bild_bearbeitet_" + str(n) + ".png",     face_gray)
 
 # --------------------------Geschlechterkennung-----------------------------------------------
 
+# das finden Sie in der Datei 'detect_gender.p'
 
 
-#--------------------------  Preprocessing endet hier --------------------------
+
+#-------------------------- END Preprocessing endet hier --------------------------
+
+
+#--------------------------  BEGIN Preprocessing mit der ersten Methode _ hart cropping --------------------------
+
 #     print('original dimension :', images[n].shape)  # Print image shape
 #     scale_percent = 25  # percent of original size
 #     width = int(images[n].shape[1] * scale_percent / 100)
@@ -83,7 +112,7 @@ import cv2
 #     dim = (width, height)
 #     # resize image
 #     resized = cv2.resize(images[n], dim, interpolation=cv2.INTER_AREA)
-#     cropped_image = resized[150:350, 220:380]
+#     cropped_image = resized[150:350, 220:380] # hart cropping
 #     cv2.imwrite('C:\\Users\\ZAKARIA\\Desktop\\New folder\\CFD Version 3.0\\Images\\cropped\\img' + str(n) + '.jpg',cropped_image)
 #
 # time.sleep(30)
@@ -93,7 +122,11 @@ import cv2
 #
 # #cv2.destroyAllWindows()
 # #END
-#
+
+# --------------------------  END Preprocessing mit der ersten Methode _ hart cropping --------------------------
+
+
+# ------------------ BEGIN Generierung der Gesichter ---------------
 # GENERATE_RES = 3  # Generation resolution factor
 # # (1=32, 2=64, 3=96, 4=128, etc.)
 # GENERATE_SQUARE = 32 * GENERATE_RES  # rows/cols (should be square)
@@ -108,8 +141,8 @@ import cv2
 # SEED_SIZE = 100
 #
 # # Configuration
-# #DATA_PATH = 'C:\\Users\\ZAKARIA\\Desktop\\New folder\\CFD Version 3.0\\Images\\CFD-INDIA'
-# DATA_PATH='C:\\Users\\ZAKARIA\\Desktop\\New folder\\CFD Version 3.0\\Images\\cropped'
+# # DATA_PATH = mypath + '\\cropped_resized_images'
+# DATA_PATH = outputpath
 # EPOCHS = 50
 # BATCH_SIZE = 32
 # BUFFER_SIZE = 60000
@@ -235,6 +268,8 @@ import cv2
 #         255, dtype=np.uint8)
 #
 #     generated_images = generator.predict(noise)
+#    #cv2.imshow('rak hna zaki',generated_images)
+#    # cv2.waitKey()
 #
 #     generated_images = 0.5 * generated_images + 0.5
 #
@@ -253,6 +288,8 @@ import cv2
 #
 #     filename = os.path.join(output_path, f"train-{cnt}.png")
 #     im = Image.fromarray(image_array)
+#  #   im_median= cv2.medianBlur(src=im, ksize=5)  # Median filter "blur"
+#
 #     im.save(filename)
 #
 #
