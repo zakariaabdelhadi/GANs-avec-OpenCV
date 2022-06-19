@@ -76,6 +76,21 @@ for n in range(0, len(onlyfiles)):
 
         #hier anwenden wir den Filter "median Filter", um Noise im Bild zu entfernen
         face_median = cv2.medianBlur(src=face, ksize=5)     # Median filter "blur"
+        # # image sharpening
+
+        """
+        It is very similar to the process of blurring, except that now, 
+        instead of creating a kernel to average each pixel intensity, we are creating
+         a kernel that will cause the pixel intensities to be higher and therefore 
+         more prominent to the human eye.
+         """
+
+        # kernel = np.array([[0, -1, 0],
+        #                    [-1, 5, -1],
+        #                    [0, -1, 0]])
+        # image_sharp = cv2.filter2D(src=face_median, ddepth=-1, kernel=kernel)
+        # cv2.imshow('AV CV- Winter Wonder Sharpened', image_sharp)
+        # cv2.waitKey()
         # hier machen wir alle Bilder im Gray scale d.h. ohne Farben außer mischung scala von Schwarz und weiß
         face_gray = cv2.cvtColor(face_median, cv2.COLOR_BGR2GRAY) # machen alle Bilder schwarz & Weiß
 
@@ -165,6 +180,7 @@ if not os.path.isfile(training_binary_path):
     training_data = []
     faces_path = os.path.join(DATA_PATH)
     for filename in tqdm(os.listdir(faces_path)):
+
         path = os.path.join(faces_path, filename)
         image = Image.open(path).resize((GENERATE_SQUARE,
                                          GENERATE_SQUARE), Image.ANTIALIAS) # Image.ANTIALIAS
@@ -265,7 +281,9 @@ def save_images(cnt, noise):
 
     generated_images = generator.predict(noise)
 
-   #cv2.imshow('rak hna zaki',generated_images)
+
+
+    #cv2.imshow('rak hna zaki',generated_images)
    # cv2.waitKey()
 
     generated_images = 0.5 * generated_images + 0.5
@@ -277,6 +295,10 @@ def save_images(cnt, noise):
             c = col * (GENERATE_SQUARE + 16) + PREVIEW_MARGIN
             image_array[r:r + GENERATE_SQUARE, c:c + GENERATE_SQUARE] \
                 = generated_images[image_count] * 255
+            if cnt == EPOCHS-1:
+                cv2.imshow("Bild"+str(image_count)+" von 28",generated_images[image_count])
+                cv2.waitKey(0)
+
             image_count += 1
 
     output_path = os.path.join(DATA_PATH, 'output')
@@ -327,7 +349,6 @@ def train_step(images):
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         generated_images = generator(seed, training=True)
-
         real_output = discriminator(images, training=True)
         fake_output = discriminator(generated_images, training=True)
 
