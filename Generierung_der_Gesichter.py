@@ -43,7 +43,7 @@ import numpy
 
 # CODE TO MAKE THE CROPPING
 p = 10
-mypath = 'C:\\Users\\ZAKARIA\\Desktop\\New folder\\CFD Version 3.0\\Images\\tiri'
+mypath = 'C:\\Users\\ZAKARIA\\Desktop\\New folder\\CFD Version 3.0\\Images\\CFD-INDIA'
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 images = numpy.empty(len(onlyfiles), dtype=object)
 
@@ -55,56 +55,56 @@ if not os.path.exists(outputpath):
 
 if not os.path.exists(outputpath2):
         os.makedirs(outputpath2)
-
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-eyes_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
-for n in range(0, len(onlyfiles)):
-        images[n] = cv2.imread(join(mypath, onlyfiles[n]))
-        # hier entdecken wir Gesichter im Bild und schneiden wir sie aus (uns ist egal was das Bild nebenbei enthält )
-        faces_detected = face_cascade.detectMultiScale(images[n], scaleFactor=1.1, minNeighbors=5)
-        (x, y, w, h) = faces_detected[0]
-        # cv2.rectangle(images[n], (x, y), (x + w, y + h), (0, 255, 0), 1)
-        # hier schneiden wir das Gesicht genau aus
-        face = images[n][y:y + h, x:x + w]
-
-        dim = (300, 300)
-        # resize image . hier verarbeiten wir die Größe der Bilder
-        face = cv2.resize(face, dim, interpolation=cv2.INTER_AREA)
-        # cv2.resize(face, dim, interpolation=cv2.INTER_LINEAR) # alternativ
-        face = face[50:265, 50:250] # hart cropping
-        face = cv2.resize(face, dim, interpolation=cv2.INTER_AREA)
-
-        #hier anwenden wir den Filter "median Filter", um Noise im Bild zu entfernen
-        face_median = cv2.medianBlur(src=face, ksize=5)     # Median filter "blur"
-        # # image sharpening
-
-        """
-        It is very similar to the process of blurring, except that now, 
-        instead of creating a kernel to average each pixel intensity, we are creating
-         a kernel that will cause the pixel intensities to be higher and therefore 
-         more prominent to the human eye.
-         """
-
-        # kernel = np.array([[0, -1, 0],
-        #                    [-1, 5, -1],
-        #                    [0, -1, 0]])
-        # image_sharp = cv2.filter2D(src=face_median, ddepth=-1, kernel=kernel)
-        # cv2.imshow('AV CV- Winter Wonder Sharpened', image_sharp)
-        # cv2.waitKey()
-        # hier machen wir alle Bilder im Gray scale d.h. ohne Farben außer mischung scala von Schwarz und weiß
-        face_gray = cv2.cvtColor(face_median, cv2.COLOR_BGR2GRAY) # machen alle Bilder schwarz & Weiß
-
-        cv2.imwrite(outputpath + "/Bild_bearbeitet_" + str(n) + ".png", face_gray)
-        # in der Variable "accept" findet man 1 oder 100
-        # 1: das Bild enthält kein Gesicht
-        # 100: das Bild hat wirklich ein Gesicht entdeckt
-        accept=dg.predict_gender(outputpath + "/Bild_bearbeitet_" + str(n) + ".png")
-        print("der Wert von accept ist: "+str(accept))
-
-        # wir speichern nur Bilder, die wirklich Gesichter beinhalten
-        if (accept==100):
-                print('Gesicht erfolgreich entdeckt')
-                cv2.imwrite(outputpath2 + "/Bild_bearbeitet_" + str(n) + ".png",     face_gray)
+#
+# face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+# eyes_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+# for n in range(0, len(onlyfiles)):
+#         images[n] = cv2.imread(join(mypath, onlyfiles[n]))
+#         # hier entdecken wir Gesichter im Bild und schneiden wir sie aus (uns ist egal was das Bild nebenbei enthält )
+#         faces_detected = face_cascade.detectMultiScale(images[n], scaleFactor=1.1, minNeighbors=5)
+#         (x, y, w, h) = faces_detected[0]
+#         # cv2.rectangle(images[n], (x, y), (x + w, y + h), (0, 255, 0), 1)
+#         # hier schneiden wir das Gesicht genau aus
+#         face = images[n][y:y + h, x:x + w]
+#
+#         dim = (300, 300)
+#         # resize image . hier verarbeiten wir die Größe der Bilder
+#         face = cv2.resize(face, dim, interpolation=cv2.INTER_AREA)
+#         # cv2.resize(face, dim, interpolation=cv2.INTER_LINEAR) # alternativ
+#         face = face[50:265, 50:250] # hart cropping
+#         face = cv2.resize(face, dim, interpolation=cv2.INTER_AREA)
+#
+#         #hier anwenden wir den Filter "median Filter", um Noise im Bild zu entfernen
+#         face_median = cv2.medianBlur(src=face, ksize=5)     # Median filter "blur"
+#         # # image sharpening
+#
+#         """
+#         It is very similar to the process of blurring, except that now,
+#         instead of creating a kernel to average each pixel intensity, we are creating
+#          a kernel that will cause the pixel intensities to be higher and therefore
+#          more prominent to the human eye.
+#          """
+#
+#         # kernel = np.array([[0, -1, 0],
+#         #                    [-1, 5, -1],
+#         #                    [0, -1, 0]])
+#         # image_sharp = cv2.filter2D(src=face_median, ddepth=-1, kernel=kernel)
+#         # cv2.imshow('AV CV- Winter Wonder Sharpened', image_sharp)
+#         # cv2.waitKey()
+#         # hier machen wir alle Bilder im Gray scale d.h. ohne Farben außer mischung scala von Schwarz und weiß
+#         face_gray = cv2.cvtColor(face_median, cv2.COLOR_BGR2GRAY) # machen alle Bilder schwarz & Weiß
+#
+#         cv2.imwrite(outputpath + "/Bild_bearbeitet_" + str(n) + ".png", face_gray)
+#         # in der Variable "accept" findet man 1 oder 100
+#         # 1: das Bild enthält kein Gesicht
+#         # 100: das Bild hat wirklich ein Gesicht entdeckt
+#         accept=dg.predict_gender(outputpath + "/Bild_bearbeitet_" + str(n) + ".png")
+#         print("der Wert von accept ist: "+str(accept))
+#
+#         # wir speichern nur Bilder, die wirklich Gesichter beinhalten
+#         if (accept==100):
+#                 print('Gesicht erfolgreich entdeckt')
+#                 cv2.imwrite(outputpath2 + "/Bild_bearbeitet_" + str(n) + ".png",     face_gray)
 
 # # --------------------------Geschlechterkennung-----------------------------------------------
 #
@@ -295,8 +295,8 @@ def save_images(cnt, noise):
             c = col * (GENERATE_SQUARE + 16) + PREVIEW_MARGIN
             image_array[r:r + GENERATE_SQUARE, c:c + GENERATE_SQUARE] \
                 = generated_images[image_count] * 255
-            if cnt == EPOCHS-1:
-                cv2.imshow("Bild"+str(image_count)+" von 28",generated_images[image_count])
+            if cnt == EPOCHS-1  and image_count == 1:
+                cv2.imshow("Bild"+str(1)+" von 28", generated_images[1])
                 cv2.waitKey(0)
 
             image_count += 1
