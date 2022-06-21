@@ -59,7 +59,10 @@ if not os.path.exists(outputpath2):
 # face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 # eyes_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 # for n in range(0, len(onlyfiles)):
+
 #         images[n] = cv2.imread(join(mypath, onlyfiles[n]))
+#         face_gray = cv2.cvtColor(images[n], cv2.COLOR_BGR2GRAY) # machen alle Bilder schwarz & Weiß (effektiver fuer den Rechner)
+
 #         # hier entdecken wir Gesichter im Bild und schneiden wir sie aus (uns ist egal was das Bild nebenbei enthält )
 #         faces_detected = face_cascade.detectMultiScale(images[n], scaleFactor=1.1, minNeighbors=5)
 #         (x, y, w, h) = faces_detected[0]
@@ -295,12 +298,19 @@ def save_images(cnt, noise):
             c = col * (GENERATE_SQUARE + 16) + PREVIEW_MARGIN
             image_array[r:r + GENERATE_SQUARE, c:c + GENERATE_SQUARE] \
                 = generated_images[image_count] * 255
+            # Denoising algorithm to remove noise in the image (no-local).
+            #  Big h value (here is 31.0 / musst be odd value) perfectly removes noise but also removes image details, smaller h value preserves details but also preserves some noise
+            cv2.fastNlMeansDenoising(image_array, image_array, 31.0, 7, 21);
+            # image_array = cv2.medianBlur(src=image_array, ksize=5)     # Median filter "blur"
+
+            # image_array = cv2.fastNlMeansDenoising(image_array, 30.0, 7, 21);
+
             if cnt == EPOCHS-1  and image_count == 1:
+
                 cv2.imshow("Bild"+str(1)+" von 28", generated_images[1])
                 cv2.waitKey(0)
 
             image_count += 1
-
     output_path = os.path.join(DATA_PATH, 'output')
     if not os.path.exists(output_path):
         os.makedirs(output_path)
